@@ -3,7 +3,17 @@
 
 The adapted VPC allows you to create a shared DFG of two event logs. The visualization is enriched with frequency-related information, such as the relative frequency difference and the case coverage of activities per log. 
 
+On the nodes, you can find the following information:
+- Case frequency of the activity (for input log 1 and 2)
+- Case coverage of the activity (for input log 1 and 2)
+- Relative coverage difference. A positive difference indicates that the activity is more common in input log 1, a negative difference indicates that the activity is more common in input log 2
 
+On the edges, you can find the following information:
+- Case frequency of the connection (for input log 1 and 2)
+- Case coverage of the connection (for input log 1 and 2)
+- Relative frequency difference, i.e. in relation to the frequency of all outgoing edges of that node, what is the difference between the two logs? A positive difference indicates that the edge is a more frequent connection for input log 1, a negative difference indicates that the edge is more frequent for input log 2
+
+The edges and nodes are colour-coded according to the relative differences. Blue indiciates a negative difference, while red elements represent positive differences. The width of nodes and edges is adapted based on the relative frequency. 
 
 ## Prerequisites
 
