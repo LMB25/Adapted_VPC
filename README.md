@@ -1,7 +1,7 @@
 
-# Adapted VPC
+# Adapted Visual Process Comparator
 
-The adapted VPC allows you to create a shared DFG of two event logs. The visualization is enriched with frequency-related information, such as the relative frequency difference and the case coverage of activities per log. 
+The adapted Visual Process Comparator (VPC) allows you to create a shared DFG of two event logs. The visualization is enriched with frequency-related information, such as the relative frequency difference and the case coverage of activities per log. 
 
 On the nodes, you can find the following information:
 - Case frequency of the activity (for input log 1 and 2)
