@@ -105,7 +105,7 @@ def get_case_coverage_edge(log, edge_out, edge_in, num_cases, activity_col_name=
     case_coverage = round(case_coverage*100, 1)
     return case_coverage
 
-def color_edge(rel_freq_diff):
+def get_color_edge(rel_freq_diff):
     """
     Determines color of edge according to relative frequency difference
 
@@ -129,7 +129,7 @@ def color_edge(rel_freq_diff):
         color = mpl.colors.rgb2hex(rgb)
     return color
 
-def color_node(rel_cov_diff):
+def get_color_node(rel_cov_diff):
     """
     Determines color of node according to relative case coverage difference
 
@@ -147,7 +147,7 @@ def color_node(rel_cov_diff):
     color = mpl.colors.rgb2hex(rgb)
     return color
 
-def node_thickness(abs1, abs2, total):
+def get_node_thickness(abs1, abs2, total):
     """
     Determines thickness of node border according to case coverage
 
@@ -173,7 +173,7 @@ def node_thickness(abs1, abs2, total):
         thickness = rel_freq*3 + 0.25
     return thickness
 
-def get_rel_freq_diff_vert(cov1, cov2):
+def get_rel_freq_diff_node(cov1, cov2):
     """
     Determines relative frequency difference of case coverage for node
 
@@ -186,20 +186,20 @@ def get_rel_freq_diff_vert(cov1, cov2):
    
     Returns
     -----------
-    rel_freq_diff_vert: float, percentage
+    rel_freq_diff_node: float, percentage
         Coverage difference 
     color: hex code 
         Color of node
     """
-    rel_freq_diff_vert = cov1 - cov2
+    rel_freq_diff_node = cov1 - cov2
 
     # color of nodee
-    color = color_node(rel_freq_diff_vert)
+    color = get_color_node(rel_freq_diff_node)
 
     # relative case coverage difference
-    rel_freq_diff_vert = round(rel_freq_diff_vert, 1)
+    rel_freq_diff_node = round(rel_freq_diff_node, 1)
 
-    return rel_freq_diff_vert, color 
+    return rel_freq_diff_node, color 
 
 def get_outgoing_edges_frequency(node, log_edges):
     """
@@ -214,9 +214,9 @@ def get_outgoing_edges_frequency(node, log_edges):
             yield freq
 
 
-def relative_freq_diff_width(edge, L1_edges, L2_edges):
+def get_relative_freq_diff_width_edge(edge, L1_edges, L2_edges):
     """
-    Determines width of edge
+    Determines relative frequency difference and width of edge
 
     Parameters
     -----------
@@ -261,7 +261,7 @@ def relative_freq_diff_width(edge, L1_edges, L2_edges):
     #print('L2: {} to {}, freq {}, sum {}'.format(edge[0], edge[1], freq_L2, freq_sum_L2))
 
     # color of edge
-    color = color_edge(rel_freq_dif)
+    color = get_color_edge(rel_freq_dif)
 
     # calculate width
     if (not edge in L1_edges) and (not edge in L2_edges):
@@ -317,7 +317,7 @@ def get_node_label(activity, log1_act_count, log1_rel_act_count, log2_act_count,
         rel_freq_l2 = "0%"
         log2_act_num = 0
         rel_freq_num2 = 0
-    rel_diff_vert, node_color = get_rel_freq_diff_vert(rel_freq_num1, rel_freq_num2)
+    rel_diff_vert, node_color = get_rel_freq_diff_node(rel_freq_num1, rel_freq_num2)
 
     node_label = "\n{}:{} ({}), {}:{} ({})\n{}%".format(name_a, log1_act_num, rel_freq_l1, name_b, log2_act_num, rel_freq_l2, rel_diff_vert)
 
@@ -354,7 +354,7 @@ def get_edge_label(edge, dfg1, dfg2, num_cases_1, num_cases_2, log1, log2, name_
         Label of the edge, color of the edge, width of the edge for visualization
     """
 
-    rel_freq_dif, width, freq_L1, freq_L2, edge_color = relative_freq_diff_width(edge, dfg1, dfg2)
+    rel_freq_dif, width, freq_L1, freq_L2, edge_color = get_relative_freq_diff_width_edge(edge, dfg1, dfg2)
     rel_freq_dif_perc = round(rel_freq_dif * 100,1)
     case_cov_1 = get_case_coverage_edge(log1, edge[0], edge[1], num_cases_1)
     case_cov_2 = get_case_coverage_edge(log2, edge[0], edge[1], num_cases_2)
@@ -470,7 +470,7 @@ def adapted_vpc_pipeline(log, log1, log2, threshold, name_a, name_b):
     # create annotations
     node_labels = {act:get_node_label(act, log1_act_count, log1_rel_act_count, log2_act_count, log2_rel_act_count, name_a, name_b)[0] for act in activities}
     node_colors = {act:get_node_label(act, log1_act_count, log1_rel_act_count, log2_act_count, log2_rel_act_count, name_a, name_b)[1] for act in activities}
-    node_thickness = {act:node_thickness(log1_act_count[act] if act in log1_act else 0, log2_act_count[act] if act in log2_act else 0, sum_cases) for act in activities}
+    node_thickness = {act:get_node_thickness(log1_act_count[act] if act in log1_act else 0, log2_act_count[act] if act in log2_act else 0, sum_cases) for act in activities}
     edge_labels = {}
     edge_colors = {}
     edge_thickness = {}
