@@ -50,7 +50,7 @@ To display the labels, use the following code:
 ```javascript
 nt.toggle_physics(True) # nodes should be part of physics simulation
 nt.set_edge_smooth('dynamic') # edges have an invisible support node guiding the shape
-nt.show_buttons() # show widgets for manipulation
+nt.show_buttons(filter_=['physics', 'manipulation']) # show widgets for manipulation
 nt.show('sample_output.html')
 ```
 
