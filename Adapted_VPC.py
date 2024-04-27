@@ -119,8 +119,8 @@ def get_color_edge(rel_freq_diff):
     color: hex color code
         Color of edge
     """
-    percentage= rel_freq_diff*100
-    # if < 5%, color grey
+    percentage = rel_freq_diff*100
+    # if < 5%, color grey - otherwise, take normalized value from mpl colormap and convert to hex
     if abs(percentage) < 5:
         rgb = grey_cm(norm(percentage))[:3]
         color = mpl.colors.rgb2hex(rgb)
@@ -143,6 +143,7 @@ def get_color_node(rel_cov_diff):
     color: hex color code
         Color of node
     """
+    # take normalized value from mpl colormap and convert to hex
     rgb = rb_cm(norm(rel_cov_diff))[:3]
     color = mpl.colors.rgb2hex(rgb)
     return color
@@ -165,8 +166,10 @@ def get_node_thickness(abs1, abs2, total):
     thickness: float
         Thickness of node border
     """
+    # weigh combined case frequency by total number of cases
     instances_sum = abs1 + abs2 
     rel_freq = divide(instances_sum, total)
+    # range from (0.25, 3.25]
     if rel_freq == 0:
         thickness = 0.25
     else:
@@ -191,9 +194,10 @@ def get_rel_freq_diff_node(cov1, cov2):
     color: hex code 
         Color of node
     """
+    # substract case coverage in log 2 from log 1
     rel_freq_diff_node = cov1 - cov2
 
-    # color of nodee
+    # color of node
     color = get_color_node(rel_freq_diff_node)
 
     # relative case coverage difference
@@ -209,6 +213,7 @@ def get_outgoing_edges_frequency(node, log_edges):
     returns: 
         freq: int, frequency of edge
     """
+    # run through all edges, if match of activity with outgoing node, take frequency
     for edge, freq in log_edges.items():
         if node == edge[0]:
             yield freq
@@ -263,7 +268,7 @@ def get_relative_freq_diff_width_edge(edge, L1_edges, L2_edges):
     # color of edge
     color = get_color_edge(rel_freq_dif)
 
-    # calculate width
+    # calculate width, ranges from (0.5, 4.5]
     if (not edge in L1_edges) and (not edge in L2_edges):
         width = 0.25
     else:
@@ -402,7 +407,7 @@ def get_start_end_edge_label(act, start_end_activities1, start_end_activities2, 
 
     return (edge_label)
 
-def adapted_vpc_pipeline(log, log1, log2, threshold, name_a, name_b):
+def adapted_vpc_pipeline(log, log1, log2, case_id_col, activity_col, time_col, threshold, name_a, name_b):
     """
     Evaluates logs based on adapted VPC procedure
 
@@ -414,6 +419,12 @@ def adapted_vpc_pipeline(log, log1, log2, threshold, name_a, name_b):
         First input log
     log2: event log/ DataFrame
         Second input log
+    case_id_col: str
+        Name of the case identifier column
+    activity_col: str
+        Name of the activity column
+    time_col: str
+        Name of the timestamp column
     threshold: float
         Minimum relative frequency for paths to be shown
     name_a: str
@@ -432,10 +443,13 @@ def adapted_vpc_pipeline(log, log1, log2, threshold, name_a, name_b):
     start_labels, end_labels: dicts
         Edge labels for edges from start and to end
     """
-    # convert to df
+    # convert to df and format to PM standard
     log1_df = pm4py.convert_to_dataframe(log1)
+    log1_df = pm4py.format_dataframe(log1_df, case_id=case_id_col, activity_key=activity_col, timestamp_key=time_col) 
     log2_df = pm4py.convert_to_dataframe(log2)
-    # discover dfgs
+    log2_df = pm4py.format_dataframe(log2_df, case_id=case_id_col, activity_key=activity_col, timestamp_key=time_col) 
+    log = pm4py.format_dataframe(log, case_id=case_id_col, activity_key=activity_col, timestamp_key=time_col) 
+    # discover dfg, get activity count
     print("Discover and filter DFG...")
     dfg_full, start_activities, end_activities = pm4py.discover_dfg(log)
     print("Full DFG has {} edges".format(len(dfg_full)))
@@ -461,9 +475,9 @@ def adapted_vpc_pipeline(log, log1, log2, threshold, name_a, name_b):
     print("Discovered DFG 2")
     # num cases of sublogs + num cases per log
     sum_cases = len(log1_df['case:concept:name'].unique()) + len(log2_df['case:concept:name'].unique())
-    num_cases_1=len(log1_df['case:concept:name'].unique())
+    num_cases_1 = len(log1_df['case:concept:name'].unique())
     print("Number of cases log 1: {}".format(num_cases_1))
-    num_cases_2=len(log2_df['case:concept:name'].unique())
+    num_cases_2 = len(log2_df['case:concept:name'].unique())
     print("Number of cases log 2: {}".format(num_cases_2))
     
     print("Creating annotations...")
@@ -475,7 +489,7 @@ def adapted_vpc_pipeline(log, log1, log2, threshold, name_a, name_b):
     edge_colors = {}
     edge_thickness = {}
     num_all_edge = len(dfg.keys())
-    i=1
+    #i=1
     log1_conv = log_converter.apply(log1, variant=log_converter.Variants.TO_EVENT_LOG)
     log2_conv = log_converter.apply(log2, variant=log_converter.Variants.TO_EVENT_LOG)
     for edge in dfg.keys():
@@ -484,7 +498,7 @@ def adapted_vpc_pipeline(log, log1, log2, threshold, name_a, name_b):
         edge_colors[edge] = edge_res[1]
         edge_thickness[edge] = edge_res[2]
         #print("{}/{}".format(i, num_all_edge))
-        i+=1
+        #i+=1
 
 
     start_labels={act:get_start_end_edge_label(act, start_activities1, start_activities2,num_cases_1, num_cases_2, name_a, name_b) for act in start_activities}
@@ -610,7 +624,7 @@ def pyvis_visualization(nt, activities_count, dfg, start_activities=None, end_ac
     print("Adapted VPC done!")
     return nt
 
-def apply_adapted_vpc(nt, concat_log, log_1, log_2, name_a="A", name_b="B", frac_paths=0.4, show_edge_labels=True, edge_label_min=0, case_coverage_min=0):
+def apply_adapted_vpc(nt, concat_log, log_1, log_2, case_id_col='case:concept:name', activity_col='concept:name', time_col='time:timestamp', name_a="A", name_b="B", frac_paths=0.4, show_edge_labels=True, edge_label_min=0, case_coverage_min=0):
     """
     Applies adapted VPC pipeline and visualization procedure
 
@@ -624,6 +638,12 @@ def apply_adapted_vpc(nt, concat_log, log_1, log_2, name_a="A", name_b="B", frac
         Input log 1
     log_2: event log/ DataFrame
         Input log 2
+    case_id_col: str
+        Name of the case identifier column
+    activity_col: str
+        Name of the activity column
+    time_col: str
+        Name of the timestamp column
     name_a: str
         Name for input log 1 for visualization
     name_b: str
@@ -643,7 +663,7 @@ def apply_adapted_vpc(nt, concat_log, log_1, log_2, name_a="A", name_b="B", frac
         Network filled with nodes and edges
     """
 
-    dfg, act, start, end, node_labels, node_colors, node_thickness, edge_labels, edge_colors, edge_thickness, start_labels, end_labels = adapted_vpc_pipeline(concat_log, log_1, log_2, frac_paths, name_a, name_b)
+    dfg, act, start, end, node_labels, node_colors, node_thickness, edge_labels, edge_colors, edge_thickness, start_labels, end_labels = adapted_vpc_pipeline(concat_log, log_1, log_2, case_id_col, activity_col, time_col, frac_paths, name_a, name_b)
 
     nt = pyvis_visualization(nt, act, dfg,start_activities=start, end_activities=end, node_labels=node_labels, node_colors=node_colors,  edge_labels=edge_labels, edge_colors=edge_colors, 
                              node_thickness=node_thickness, edge_thickness=edge_thickness, show_edge_labels=show_edge_labels, edge_label_min=edge_label_min, start_labels=start_labels, end_labels=end_labels, case_coverage_min=case_coverage_min)

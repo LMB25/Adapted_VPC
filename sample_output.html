@@ -1,0 +1,124 @@
+<html>
+<head>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vis-network@latest/styles/vis-network.css" type="text/css" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vis-network@latest/dist/vis-network.min.js"> </script>
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+
+<style type="text/css">
+
+        #mynetwork {
+            width: 1300px;
+            height: 1300px;
+            background-color: #ffffff;
+            border: 1px solid lightgray;
+            position: relative;
+            float: left;
+        }
+
+        
+
+        
+        #config {
+            float: left;
+            width: 400px;
+            height: 600px;
+        }
+        
+
+        
+</style>
+
+</head>
+
+<body>
+<div id = "mynetwork"></div>
+
+
+<div id = "config"></div>
+
+<script type="text/javascript">
+
+    // initialize global variables.
+    var edges;
+    var nodes;
+    var network; 
+    var container;
+    var options, data;
+
+    
+    // This method is responsible for drawing the graph, returns the drawn network
+    function drawGraph() {
+        var container = document.getElementById('mynetwork');
+        
+        
+
+        // parsing and collecting nodes and edges from the python
+        nodes = new vis.DataSet([{"color": "lightgrey", "id": "Start", "label": "Start", "physics": false, "shape": "circle"}, {"borderWidth": 3.25, "color": "#fffdfd", "id": "2561740040219418031", "label": "Created Order\nA:100 (100.0%), B:100 (100.0%)\n0.0%", "physics": false, "shape": "box"}, {"borderWidth": 3.25, "color": "#fffdfd", "id": "-8429513974868796150", "label": "Order Completed\nA:100 (100.0%), B:100 (100.0%)\n0.0%", "physics": false, "shape": "box"}, {"borderWidth": 3.25, "color": "#fffdfd", "id": "-6478187616652454845", "label": "Order Planned\nA:100 (100.0%), B:100 (100.0%)\n0.0%", "physics": false, "shape": "box"}, {"borderWidth": 3.25, "color": "#fffdfd", "id": "-594532360218334271", "label": "Risk Assessment\nA:100 (100.0%), B:100 (100.0%)\n0.0%", "physics": false, "shape": "box"}, {"borderWidth": 1.81, "color": "#ffb9b9", "id": "7468920737284085934", "label": "Safety Measure\nA:59 (59.0%), B:45 (45.0%)\n14.0%", "physics": false, "shape": "box"}, {"borderWidth": 3.25, "color": "#fffdfd", "id": "-1403815640762082665", "label": "Work Finished\nA:100 (100.0%), B:100 (100.0%)\n0.0%", "physics": false, "shape": "box"}, {"borderWidth": 3.25, "color": "#fffdfd", "id": "2647815558825358234", "label": "Work Started\nA:100 (100.0%), B:100 (100.0%)\n0.0%", "physics": false, "shape": "box"}, {"color": "lightgrey", "id": "End", "label": "End", "physics": false, "shape": "circle"}]);
+        edges = new vis.DataSet([{"arrows": "to", "dashes": true, "from": "Start", "label": "A:100 (100.0%) \nB:100 (100.0)%", "to": "2561740040219418031"}, {"arrows": "to", "color": "#ffbdbd", "from": "2561740040219418031", "label": "A:61 (61.0%) B:48 (48.0)% \n13.0%", "to": "-6478187616652454845", "width": 2.6799999999999997}, {"arrows": "to", "color": "#bdbdff", "from": "2561740040219418031", "label": "A:39 (39.0%) B:52 (52.0)% \n-13.0%", "to": "-594532360218334271", "width": 2.3200000000000003}, {"arrows": "to", "color": "#ffbdbd", "from": "-6478187616652454845", "label": "A:61 (61.0%) B:48 (48.0)% \n13.0%", "to": "-594532360218334271", "width": 2.6799999999999997}, {"arrows": "to", "color": "#ffe1e1", "from": "-6478187616652454845", "label": "A:26 (26.0%) B:20 (20.0)% \n6.0%", "to": "7468920737284085934", "width": 1.42}, {"arrows": "to", "color": "#9d9dff", "from": "-6478187616652454845", "label": "A:13 (13.0%) B:32 (32.0)% \n-19.0%", "to": "2647815558825358234", "width": 1.4}, {"arrows": "to", "color": "#bdbdff", "from": "-594532360218334271", "label": "A:39 (39.0%) B:52 (52.0)% \n-13.0%", "to": "-6478187616652454845", "width": 2.3200000000000003}, {"arrows": "to", "color": "#ffd5d5", "from": "-594532360218334271", "label": "A:33 (33.0%) B:25 (25.0)% \n8.0%", "to": "7468920737284085934", "width": 1.6600000000000001}, {"arrows": "to", "color": "#ffe5e5", "from": "-594532360218334271", "label": "A:28 (28.0%) B:23 (23.0)% \n5.0%", "to": "2647815558825358234", "width": 1.52}, {"arrows": "to", "color": "#e1e1ff", "from": "7468920737284085934", "label": "A:53 (30.0%) B:51 (26.0)% \n-5.8%", "to": "7468920737284085934", "width": 2.508928571428571}, {"arrows": "to", "color": "#ffe1e1", "from": "7468920737284085934", "label": "A:59 (59.0%) B:45 (45.0)% \n5.8%", "to": "2647815558825358234", "width": 2.491071428571429}, {"arrows": "to", "color": "#dddcdc", "from": "-1403815640762082665", "label": "A:100 (100.0%) B:100 (100.0)% \n0.0%", "to": "-8429513974868796150", "width": 4.5}, {"arrows": "to", "color": "#dddcdc", "from": "2647815558825358234", "label": "A:100 (100.0%) B:100 (100.0)% \n0.0%", "to": "-1403815640762082665", "width": 4.5}, {"arrows": "to", "dashes": true, "from": "-8429513974868796150", "label": "A:100 (100.0%) \nB:100 (100.0)%", "to": "End"}]);
+
+        // adding nodes and edges to the graph
+        data = {nodes: nodes, edges: edges};
+
+        var options = {
+    "configure": {
+        "enabled": true,
+        "filter": [
+            "physics",
+            "manipulation"
+        ]
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+        
+        
+
+        
+        // if this network requires displaying the configure window,
+        // put it in its div
+        options.configure["container"] = document.getElementById("config");
+        
+
+        network = new vis.Network(container, data, options);
+	 
+        
+
+
+        
+
+        return network;
+
+    }
+
+    drawGraph();
+
+</script>
+</body>
+</html>
